@@ -1,0 +1,18 @@
+# InfluxDB als Datenquelle. Dashboard und Alarme verweisen auf die UID "influxdb".
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB
+    type: influxdb
+    uid: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    isDefault: true
+    editable: false
+    jsonData:
+      version: Flux
+      organization: home
+      defaultBucket: waschkueche
+      httpMode: POST
+    secureJsonData:
+      token: $INFLUX_TOKEN
