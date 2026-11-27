@@ -4,7 +4,7 @@
 Zwei Platten und ein Buegel:
 
   c6l_halterung_wohn.stl   Gateway am Fenster. Wie Rev. 3 (Platte mit zwei Gewindeeinsaetzen M4 short unter
-                           den Lego-Loechern des C6L), dazu rechts zwei weitere Einsaetze fuer den Buegel.
+                           den Befestigungsloechern des C6L), dazu rechts zwei weitere Einsaetze fuer den Buegel.
   c6l_halterung_wasc.stl   Sender in der Waschkueche. Der C6L sitzt 20 mm hoeher, darunter bleibt Platz fuer
                            den Grove-Stecker und das Kabel zum Beschleunigungssensor. Quer unter dem Kabel
                            laeuft ein Tunnel fuer einen Kabelbinder 3 x 1,5 mm durch die Platte.
@@ -33,8 +33,8 @@ VORLAGE = sys.argv[1] if len(sys.argv) > 1 else "Koerper1.stl"
 
 # ---- C6L (aus dem M5-Gehaeusemodell Unit_C6L.stl und einem Foto) ----
 C6L_L, C6L_B, C6L_H = 56.0, 24.0, 8.0
-LEGO_Y = 12.0                             # Lochmitte ab Grove-Ende
-LEGO_X = 8.0                              # je Seite ab Mitte (16 mm Abstand)
+LOCH_Y = 12.0                             # Lochmitte ab Grove-Ende
+LOCH_X = 8.0                              # je Seite ab Mitte (16 mm Abstand)
 USB_Y = 21.5                              # Mitte der USB-C-Buchse ab Grove-Ende (Oeffnung 17,3 bis 25,7), rechte Seite
 
 # ---- Gewindeeinsatz M4 short (CNC Kitchen: Bohrung 5,6, Sackloch min. 5 tief, Wand min. 2,1) ----
@@ -150,7 +150,7 @@ def platte(name, hoeher, mit_tunnel, basis):
     for t in teile:
         t.fix_normals()
     koerper = trimesh.boolean.union(teile, engine="manifold")
-    punkte = [(MITTE_X - LEGO_X, y_grove + LEGO_Y), (MITTE_X + LEGO_X, y_grove + LEGO_Y),
+    punkte = [(MITTE_X - LOCH_X, y_grove + LOCH_Y), (MITTE_X + LOCH_X, y_grove + LOCH_Y),
               (MITTE_X + BUEGEL_X, y_grove + USB_Y - SCHRAUBE_Y), (MITTE_X + BUEGEL_X, y_grove + USB_Y + SCHRAUBE_Y)]
     ab = [insertloch(x, y) for x, y in punkte]
     text = ""

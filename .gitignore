@@ -5,7 +5,6 @@ server/.env
 server/mosquitto/config/passwd
 *.env
 !.env.example
-meshtastic-backup/
 
 # Build
 build/
