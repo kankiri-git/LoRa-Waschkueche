@@ -88,7 +88,7 @@ cd server
 docker compose up -d     # startet Mosquitto, InfluxDB, Telegraf, Grafana und die Fertig-Meldung
 ```
 
-Grafana läuft dann auf `http://<Server>:3000` (Benutzer `admin`, Passwort `GRAFANA_PASS` aus `server/.env`), mit dem Dashboard **Waschküche**. Port 1883 (MQTT) muss aus dem Heimnetz erreichbar sein, das Gateway verbindet sich dorthin. Mehr unter [Server](#server).
+Grafana läuft dann auf `http://<Server>:3000` (Benutzer `admin`, Passwort `GRAFANA_PASS` aus `server/.env`), mit dem Dashboard **Waschküche**. Port 1883 (MQTT) muss aus dem Heimnetz erreichbar sein, das Gateway verbindet sich dorthin. Mehr in [server/README.md](server/README.md).
 
 Wer schon einen MQTT-Broker hat: dort einen Benutzer für das Gateway anlegen, der unter `sensors/waschkueche/#` schreiben und `sensors/waschkueche/set` lesen darf. Die übrigen Dienste aus `server/` lassen sich einzeln übernehmen.
 
@@ -232,6 +232,8 @@ Test am Rechner (ohne Geräte): `g++ -std=c++17 -O2 -Wall -o /tmp/test_vibration
 
 `einrichten.sh` legt `server/.env` mit zufälligen Passwörtern an und die MQTT-Benutzer `waschkueche` (Gateway), `telegraf` und `fertigmeldung`. Ein zweiter Lauf ändert `.env` nicht.
 
+Einrichten, Ausprobieren ohne Hardware, Alarme, Sichern, Aktualisieren und Fehlersuche stehen in [server/README.md](server/README.md).
+
 ### Fertig-Meldung
 
 `server/fertigmeldung` liest die Leistung beider Maschinen und meldet einmal je Lauf unter `sensors/waschkueche/fertig`, dazu den Zustand je Maschine (retained) unter `sensors/waschkueche/zustand/<maschine>`.
@@ -345,7 +347,7 @@ Hält den C6L auf dem offiziellen Raspberry-Pi-USB-C-Netzteil (EU, 15,3 W). Drei
 | `c6l_halterung_wasc.stl` | Platte für den Sender, C6L 20 mm höher, darunter Platz für das Grove-Kabel und ein Tunnel für einen Kabelbinder |
 | `usb_buegel.stl` | Bügel über dem USB-C-Stecker, passt auf beide Platten |
 
-**Platte:** 6 mm dick, vier Löcher für Gewindeeinsätze **M4 short** (Bohrung 5,8 mm, 5 mm tief). Zwei sitzen genau unter den beiden Lego-Löchern des C6L (16 mm Abstand, 12 mm vom Grove-Ende), zwei daneben für den Bügel (30 mm Abstand, mittig zur USB-C-Buchse 21,5 mm vom Grove-Ende). Der C6L wird mit 2× **M4×12** von vorn festgeschraubt, das Grove-Ende zeigt nach unten.
+**Platte:** 6 mm dick, vier Löcher für Gewindeeinsätze **M4 short** (Bohrung 5,8 mm, 5 mm tief). Zwei sitzen genau unter den beiden Befestigungslöchern des C6L (16 mm Abstand, 12 mm vom Grove-Ende), zwei daneben für den Bügel (30 mm Abstand, mittig zur USB-C-Buchse 21,5 mm vom Grove-Ende). Der C6L wird mit 2× **M4×12** von vorn festgeschraubt, das Grove-Ende zeigt nach unten.
 
 **Bügel:** U-Form über dem festen Teil des USB-C-Steckers, innen 12,0 mm breit (klemmt einen 12 mm breiten Stecker) und 8,2 mm hoch, mit 2× **M4×12** von oben verschraubt. Langlöcher (± 1 mm): erst über den Stecker drücken, dann festschrauben. Andere Stecker: Maße in `c6l_halterung.py` anpassen.
 
@@ -355,7 +357,7 @@ Hält den C6L auf dem offiziellen Raspberry-Pi-USB-C-Netzteil (EU, 15,3 W). Drei
 
 ### Sensor an der Waschmaschine (`accel_halterung.stl`)
 
-Für den M5Stack Unit Accel (24 × 32 × 8 mm): Klebeplatte 60 × 80 × 3 mm, in der Mitte ein Sockel mit zwei Gewindeeinsätzen **M4 short** unter den Lego-Löchern des Sensors, 2× **M4×12** von vorn. Ein Rand an drei Seiten hält ihn gerade. Die glatte Rückseite klebt mit VHB-Band an einer ebenen Stelle der Seitenwand; vorher beide Flächen mit Isopropanol entfetten. Vor dem Grove-Ende steht ein Steg mit Tunnel für einen Kabelbinder (2,5 mm): Kabel dort festbinden, sonst misst der Sensor das schwingende Kabel mit.
+Für den M5Stack Unit Accel (24 × 32 × 8 mm): Klebeplatte 60 × 80 × 3 mm, in der Mitte ein Sockel mit zwei Gewindeeinsätzen **M4 short** unter den Befestigungslöchern des Sensors, 2× **M4×12** von vorn. Ein Rand an drei Seiten hält ihn gerade. Die glatte Rückseite klebt mit VHB-Band an einer ebenen Stelle der Seitenwand; vorher beide Flächen mit Isopropanol entfetten. Vor dem Grove-Ende steht ein Steg mit Tunnel für einen Kabelbinder (2,5 mm): Kabel dort festbinden, sonst misst der Sensor das schwingende Kabel mit.
 
 Druck: Klebeseite flach aufs Bett, ohne Stütze. Beim Einschmelzen der Einsätze die Platte auf eine ebene Fläche legen. `python3 accel_halterung.py` erzeugt die STL neu, `python3 accel_vorschau.py accel_halterung.stl accel_halterung_vorschau.png` die Bilder.
 

@@ -7,7 +7,7 @@ stl, out = sys.argv[1], sys.argv[2]
 m = trimesh.load(stl)
 T = trimesh.transformations.translation_matrix
 R = trimesh.transformations.rotation_matrix
-# Sensor als Quader mit zwei Lego-Loechern, Grove-Stecker, Kabel, Schraubenkoepfe, Kabelbinder
+# Sensor als Quader mit zwei Befestigungsloechern, Grove-Stecker, Kabel, Schraubenkoepfe, Kabelbinder
 unit = trimesh.creation.box(extents=[24, 32, 8], transform=T([12, 16, 4]))
 loecher = [trimesh.creation.cylinder(radius=2.5, height=9, sections=32, transform=T([x, 12, 4])) for x in (4, 20)]
 unit = trimesh.boolean.difference([unit] + loecher, engine='manifold')
