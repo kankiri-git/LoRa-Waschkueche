@@ -1,0 +1,16 @@
+# Wer darf was. Benutzer und Passwoerter legt einrichten.sh an (Datei passwd daneben).
+
+user waschkueche
+# LoRa-Gateway (C6L am Fenster): schreibt Leistung, Vibration, Funk-Zustand und liest .../set (Einstellungen des
+# Senders: Sendetakt, Schwellen). Schaltet nichts.
+topic readwrite sensors/waschkueche/#
+
+user telegraf
+# schreibt die Werte in die Datenbank, liest nur
+topic read sensors/waschkueche/#
+
+user fertigmeldung
+# erkennt "fertig" und meldet es unter .../fertig und .../zustand/<maschine>
+topic read sensors/waschkueche/#
+topic write sensors/waschkueche/fertig
+topic write sensors/waschkueche/zustand/#

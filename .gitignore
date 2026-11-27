@@ -1,0 +1,20 @@
+# Zugangsdaten nie einchecken
+secrets.h
+**/secrets.h
+server/.env
+server/mosquitto/config/passwd
+*.env
+!.env.example
+meshtastic-backup/
+
+# Build
+build/
+firmware/*/build/
+firmware/*/rolle.h
+*.bin
+*.elf
+*.map
+
+# Python
+__pycache__/
+.pytest_cache/

@@ -1,0 +1,152 @@
+# Drei Alarme fuer die Funkstrecke. Sie sind PAUSIERT (isPaused: true), solange noch nicht alles haengt:
+# sonst meldet "Gateway liefert keine Daten" schon beim ersten Start. Wenn Sender, Shellys und Gateway laufen,
+# hier isPaused: false setzen und Grafana neu starten (docker compose restart grafana).
+# Wohin die Meldung geht (Mail, Telegram, ntfy ...), stellt man in Grafana unter Alerting > Contact points ein;
+# ohne Einstellung landet sie bei der Vorgabe "grafana-default-email" (braucht SMTP, siehe README).
+apiVersion: 1
+groups:
+- orgId: 1
+  name: waschkueche
+  folder: Waschküche
+  interval: 1m
+  rules:
+  - uid: waschkueche-gateway-nodata
+    title: 'Waschküche: Gateway liefert keine Daten'
+    condition: C
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 900
+        to: 0
+      datasourceUid: influxdb
+      model:
+        refId: A
+        query: "from(bucket: \"waschkueche\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |>\
+          \ filter(fn: (r) => r._measurement == \"waschkueche_funk\" and r._field == \"gw_laufzeit_s\")\n  |> count()\n"
+    - refId: B
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: reduce
+        expression: A
+        reducer: last
+        settings:
+          mode: dropNN
+    - refId: C
+      datasourceUid: __expr__
+      model:
+        refId: C
+        type: threshold
+        expression: B
+        conditions:
+        - evaluator:
+            type: lt
+            params:
+            - 1
+    noDataState: Alerting
+    execErrState: Error
+    for: 5m
+    keepFiringFor: 5m
+    labels:
+      bereich: waschkueche
+      severity: warning
+    annotations:
+      summary: Das LoRa-Gateway der Waschküche (C6L am Fenster, http://waschkueche-wohn.local/) hat seit 15 min
+        nichts per MQTT gemeldet. Ohne Gateway kommt keine Fertig-Meldung. USB-Netzteil und WLAN prüfen; die Statusseite
+        zeigt MQTT und Funk.
+    isPaused: true
+  - uid: waschkueche-funk
+    title: 'Waschküche: Sender sendet nicht mehr'
+    condition: C
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 900
+        to: 0
+      datasourceUid: influxdb
+      model:
+        refId: A
+        query: "from(bucket: \"waschkueche\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |>\
+          \ filter(fn: (r) => r._measurement == \"waschkueche_funk\" and (r._field == \"alter_s\" or r._field ==\
+          \ \"gw_laufzeit_s\"))\n  |> last()\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn:\
+          \ \"_value\")\n  |> map(fn: (r) => ({ _time: r._time, _value: (if r.alter_s < 0.0 then r.gw_laufzeit_s\
+          \ else r.alter_s) / 60.0 }))\n"
+    - refId: B
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: reduce
+        expression: A
+        reducer: last
+        settings:
+          mode: dropNN
+    - refId: C
+      datasourceUid: __expr__
+      model:
+        refId: C
+        type: threshold
+        expression: B
+        conditions:
+        - evaluator:
+            type: gt
+            params:
+            - 30
+    noDataState: OK
+    execErrState: Error
+    for: 5m
+    keepFiringFor: 10m
+    labels:
+      bereich: waschkueche
+      severity: warning
+    annotations:
+      summary: 'Seit {{ $values.B }} min keine Sendung aus der Waschküche. Der Sender ist aus, abgezogen oder der
+        Funk ist gestört; solange gibt es keine Fertig-Meldung. In der Waschküche nachsehen: Steckdosenleiste an,
+        USB-Kabel steckt, Taster drücken (das Display zeigt den letzten Empfang).'
+    isPaused: true
+  - uid: waschkueche-shelly
+    title: 'Waschküche: Steckdose nicht erreichbar'
+    condition: C
+    data:
+    - refId: A
+      relativeTimeRange:
+        from: 3600
+        to: 0
+      datasourceUid: influxdb
+      model:
+        refId: A
+        query: "from(bucket: \"waschkueche\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |>\
+          \ filter(fn: (r) => r._measurement == \"waschkueche\" and r._field == \"online\")\n  |> group(columns:\
+          \ [\"maschine\"])\n  |> last()\n  |> map(fn: (r) => ({ _time: r._time, maschine: r.maschine, _value: if\
+          \ r._value == true then 1.0 else 0.0 }))\n"
+    - refId: B
+      datasourceUid: __expr__
+      model:
+        refId: B
+        type: reduce
+        expression: A
+        reducer: last
+        settings:
+          mode: dropNN
+    - refId: C
+      datasourceUid: __expr__
+      model:
+        refId: C
+        type: threshold
+        expression: B
+        conditions:
+        - evaluator:
+            type: lt
+            params:
+            - 1
+    noDataState: OK
+    execErrState: Error
+    for: 30m
+    keepFiringFor: 10m
+    labels:
+      bereich: waschkueche
+      severity: warning
+    annotations:
+      summary: 'Der Sender in der Waschküche erreicht die Messsteckdose {{ $labels.maschine }} seit 30 min nicht.
+        Shelly abgezogen, zurückgesetzt oder nicht mehr im WLAN des Senders (feste IP: Waschmaschine 192.168.4.201,
+        Trockner 192.168.4.202). Für diese Maschine gibt es solange keine Fertig-Meldung.'
+    isPaused: true
